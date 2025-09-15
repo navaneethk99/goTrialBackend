@@ -4,6 +4,7 @@ import (
 	"crudProject/database"
 	"crudProject/routes"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 import "log"
 
@@ -19,11 +20,19 @@ func setupRoutes(app *fiber.App) {
 	app.Post("/users", routes.CreateUser)
 	app.Get("/users", routes.GetUsers)
 	app.Get("/users/:id", routes.GetUser)
+	app.Put("/users/:id", routes.UpdateUser)
+	app.Delete("/users/:id", routes.DeleteUser)
 }
 
 func main() {
 	database.ConnectDb()
 	app := fiber.New()
+
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "http://localhost:3000", // frontend origin
+		AllowMethods: "GET,POST,PUT,DELETE,OPTIONS",
+		AllowHeaders: "Origin, Content-Type, Accept",
+	}))
 
 	setupRoutes(app)
 
