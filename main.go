@@ -1,21 +1,48 @@
 package main
 
 import (
-  "fmt"
+	"crudProject/database"
+	"crudProject/routes"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
+import "log"
 
-//TIP <p>To run your code, right-click the code and select <b>Run</b>.</p> <p>Alternatively, click
-// the <icon src="AllIcons.Actions.Execute"/> icon in the gutter and select the <b>Run</b> menu item from here.</p>
+func welcome(c *fiber.Ctx) error {
+	return c.SendString("API is running successfully")
+}
+
+func setupRoutes(app *fiber.App) {
+	// welcome endpoint
+	app.Get("/", welcome)
+
+	// user endpoints
+	app.Post("/users", routes.CreateUser)
+	app.Get("/users", routes.GetUsers)
+	app.Get("/users/:id", routes.GetUser)
+	app.Put("/users/:id", routes.UpdateUser)
+	app.Delete("/users/:id", routes.DeleteUser)
+
+	// product endpoints
+	app.Post("/product", routes.CreateProduct)
+	app.Get("/products", routes.GetProducts)
+	app.Get("/products/:id", routes.GetProduct)
+	app.Put("/products/:id", routes.UpdateProduct)
+	app.Delete("/products/:id", routes.DeleteProduct)
+
+}
 
 func main() {
-  //TIP <p>Press <shortcut actionId="ShowIntentionActions"/> when your caret is at the underlined text
-  // to see how GoLand suggests fixing the warning.</p><p>Alternatively, if available, click the lightbulb to view possible fixes.</p>
-  s := "gopher"
-  fmt.Printf("Hello and welcome, %s!\n", s)
+	database.ConnectDb()
+	app := fiber.New()
 
-  for i := 1; i <= 5; i++ {
-	//TIP <p>To start your debugging session, right-click your code in the editor and select the Debug option.</p> <p>We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-	// for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.</p>
-	fmt.Println("i =", 100/i)
-  }
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "http://localhost:3000", // frontend origin
+		AllowMethods: "GET,POST,PUT,DELETE,OPTIONS",
+		AllowHeaders: "Origin, Content-Type, Accept",
+	}))
+
+	setupRoutes(app)
+
+	log.Fatal(app.Listen(":8000"))
 }
